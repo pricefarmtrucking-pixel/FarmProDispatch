@@ -29,7 +29,10 @@ services:
         sync: false
       - key: BASE_URL
         sync: false
-    disks:
-      - name: db-data
-        mountPath: /opt/render/project/src/data
-        sizeGB: 1
+    disk:
+      name: db-data
+      mountPath: /opt/render/project/src/data
+
+disks:
+  - name: db-data
+    sizeGB: 1
