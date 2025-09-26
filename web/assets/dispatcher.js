@@ -4,9 +4,24 @@ const $$ = s => Array.from(document.querySelectorAll(s));
 const rowsEl = $('#rows');
 const qEl = $('#q');
 const form = $('#add-form');
+const clockEl = $('#clock');
+
+const threadBackdrop = $('#threadBackdrop');
+const threadEl = $('#thread');
+const threadClose = $('#threadClose');
+const threadText = $('#threadText');
+const threadTarget = $('#threadTarget');
+const threadSend = $('#threadSend');
 
 const STATUS_OPTIONS = ['Planned','En-route','Arrived','Loaded','En-route to unload','Delivered'];
-function fmtPhone(p){ if(!p) return ''; return p.replace(/\+1(\d{3})(\d{3})(\d{4})/, '($1) $2-$3'); }
+
+function tick(){ clockEl.textContent = new Date().toLocaleString(); }
+setInterval(tick, 1000); tick();
+
+function fmtPhone(p){
+  if(!p) return '';
+  return p.replace(/\+1(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+}
 
 async function fetchLoads(){
   const r = await fetch('/api/loads');
@@ -42,7 +57,8 @@ function rowHTML(l){
         <button class="table-btn textDriver">Text Driver</button>
         <button class="table-btn danger del">Delete</button>
       </td>
-    </tr>`;
+    </tr>
+  `;
 }
 
 function applyFilter(items, q){
@@ -57,14 +73,13 @@ function applyFilter(items, q){
 }
 
 async function render(){
-  if (!rowsEl) return;
   const items = applyFilter(await fetchLoads(), (qEl?.value||'').trim());
   rowsEl.innerHTML = items.length
     ? items.map(rowHTML).join('')
     : `<tr><td colspan="6" style="text-align:center;padding:10px;">No loads found</td></tr>`;
 }
 
-// Hook search filter
+// Search filter
 qEl?.addEventListener('input', render);
 
 // Save/Delete/Thread/Text handlers
@@ -117,5 +132,40 @@ form?.addEventListener('submit', async e=>{
   if (r.ok){ form.reset(); render(); }
 });
 
-// initial load
+/* === Thread modal functions === */
+let currentThreadId = null;
+
+async function openThread(loadId){
+  currentThreadId = loadId;
+  threadBackdrop.style.display = 'flex';
+  await loadThread();
+}
+function closeThread(){
+  currentThreadId = null;
+  threadBackdrop.style.display = 'none';
+}
+async function loadThread(){
+  if (!currentThreadId) return;
+  const res = await fetch('/api/messages?loadId='+encodeURIComponent(currentThreadId));
+  const j = await res.json();
+  threadEl.innerHTML = (j.items||[]).map(m=>`
+    <div class="bubble"><strong>${m.fromRole||m.toRole}:</strong> ${m.body}</div>
+  `).join('');
+}
+async function sendThread(){
+  const body = threadText.value.trim();
+  if (!body) return;
+  await fetch('/api/message',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ loadId: currentThreadId, to: threadTarget.value, body })
+  });
+  threadText.value='';
+  await loadThread();
+}
+
+threadClose.addEventListener('click', closeThread);
+threadSend.addEventListener('click', sendThread);
+
+// Init
 render();
