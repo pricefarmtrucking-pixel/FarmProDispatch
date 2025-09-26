@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Message Thread • DriverComm</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <main class="container" style="max-width:800px">
+    <section class="panel" style="margin-top:20px">
+      <div class="panel-header row-between">
+        <strong>Thread</strong>
+        <input id="loadId" class="input" placeholder="Load ID (e.g., LD-12345)" style="max-width:220px" />
+      </div>
+      <div class="cards" id="thread" style="max-height:55vh; overflow:auto"></div>
+      <div class="cards">
+        <div class="row-between" style="gap:8px; flex-wrap:wrap">
+          <select id="to" class="input" style="min-width:160px">
+            <option value="driver">Driver</option>
+            <option value="dispatcher">Dispatcher</option>
+          </select>
+          <input id="msg" class="input" placeholder="Type a message…" style="flex:1 1 300px" />
+          <button id="send" class="btn btn-accent">Send</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/assets/thread.js"></script>
+</body>
+</html>

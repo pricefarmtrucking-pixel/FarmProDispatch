@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Merchants • DriverComm</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row-between">
+      <div class="brand">
+        <div class="logo">DC</div>
+        <div class="brand-text">
+          <h1>Merchants</h1>
+          <p class="muted">Manage records</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-header row-between">
+        <strong>New Merchant</strong>
+        <div>
+          <input class="input" id="name" placeholder="Name">
+          <input class="input" id="phone" placeholder="Phone">
+          <input class="input" id="email" placeholder="Email">
+          <button class="btn btn-accent" id="add">Add</button>
+        </div>
+      </div>
+      <div class="cards" style="padding:0">
+        <div style="overflow:auto">
+          <table style="width:100%; border-collapse:collapse">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="text-align:left; padding:10px">ID</th>
+                <th style="text-align:left; padding:10px">Name</th>
+                <th style="text-align:left; padding:10px">Phone</th>
+                <th style="text-align:left; padding:10px">Email</th>
+                <th style="text-align:left; padding:10px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/assets/merchants.js"></script>
+</body>
+</html>

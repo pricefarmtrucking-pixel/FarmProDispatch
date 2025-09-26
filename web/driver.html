@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Driver • DriverComm</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <main class="container" style="max-width:720px">
+    <section class="panel" style="margin-top:22px">
+      <div class="panel-header row-between">
+        <strong>Driver Status</strong>
+        <span class="muted" id="clock"></span>
+      </div>
+      <div class="cards">
+        <div id="loadMeta" class="muted"></div>
+        <div id="statusRow" style="display:flex; flex-wrap:wrap; gap:8px"></div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/assets/driver.js"></script>
+</body>
+</html>

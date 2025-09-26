@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DriverComm • Logistics Visibility</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+  <meta name="description" content="Fast, clear communication between drivers, dispatchers, shippers, and receivers." />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row-between">
+      <div class="brand">
+        <div class="logo">DC</div>
+        <div class="brand-text">
+          <h1>DriverComm</h1>
+          <p class="muted">Logistics Visibility • Simple & Fast</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a class="btn btn-accent" href="#get-started">Get started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <h2>Better updates. Fewer calls. Happier partners.</h2>
+          <p class="lead">One link for drivers to update status • Instant visibility for dispatch, shippers, and receivers.</p>
+          <div class="cta-row"><a class="btn btn-ghost" href="/thread.html">Message Threads</a>
+            <a class="btn btn-accent" href="/dispatcher">Open Dispatcher</a>
+            <a class="btn btn-ghost" href="/driver/LD-12345">Driver Portal</a>
+            <a class="btn btn-ghost" href="/shipper.html">Shipper/Receiver</a>
+          </div>
+          <ul class="ticks">
+            <li><a href="/portals.html">Shipper/Receiver Portals</a> • <a href="/merchants.html">Merchants</a> • <a href="/dispatchers.html">Dispatchers</a></li>
+            <li>En‑route, Arrived, Loaded, Departed, Delivered</li>
+            <li>ETA prompts when “En‑route” is tapped</li>
+            <li>Auto notifications to the right people</li>
+            <li>Fast, mobile‑first design</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="panel-header row-between">
+            <strong>Live Loads</strong>
+            <span class="muted" id="clock"></span>
+          </div>
+          <div id="demo-cards" class="cards"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features">
+      <div class="container grid-3">
+        <div class="feature-card">
+          <h3>Master Board</h3>
+          <p>Snapshot of every load with color‑coded status so anyone can answer “Where’s my truck?” in seconds.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Smart Updates</h3>
+          <p>Drivers tap a button, we prompt for ETAs when it matters, and notify only the people who need to know.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Scales & Tickets</h3>
+          <p>Extend later with ticket uploads, contract rollups, and auto‑totals for tons on contract.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="how">
+      <div class="container">
+        <h3>How it works</h3>
+        <ol>
+          <li>Dispatcher adds a load and assigns a driver.</li>
+          <li>Driver gets a text with a secure link to a status page.</li>
+          <li>Driver taps status (En‑route, Arrived, Loaded...). We collect ETA if appropriate.</li>
+          <li>We notify agents/merchants/receivers based on the status—no spam to the wrong folks.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="get-started" class="cta">
+      <div class="container row-between">
+        <div>
+          <h3>Ready to build it out?</h3>
+          <p class="muted">We’ll start with Dispatcher, Driver, and Shipper views next.</p>
+        </div>
+        <a class="btn btn-accent" href="/dispatcher">Open Dispatcher</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container row-between">
+      <small class="muted">© <span id="year"></span> DriverComm</small>
+      <div class="muted">v0.1</div>
+    </div>
+  </footer>
+
+  <script src="/assets/main.js" type="module"></script>
+</body>
+</html>

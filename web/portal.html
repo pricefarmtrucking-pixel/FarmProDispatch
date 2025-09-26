@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Partner Portal • DriverComm</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row-between">
+      <div class="brand">
+        <div class="logo">DC</div>
+        <div class="brand-text">
+          <h1 id="pname">Partner Portal</h1>
+          <p class="muted" id="ptype"></p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-header row-between">
+        <strong>Locations</strong>
+        <div>
+          <input class="input" id="locName" placeholder="New location name">
+          <button class="btn btn-accent" id="addLoc">Add Location</button>
+        </div>
+      </div>
+      <div class="cards" id="locations"></div>
+    </section>
+  </main>
+  <script type="module" src="/assets/portal.js"></script>
+</body>
+</html>

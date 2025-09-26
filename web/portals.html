@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portals • DriverComm</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="panel" style="margin-top:18px">
+      <div class="panel-header row-between">
+        <strong>Shipper / Receiver Portals</strong>
+        <div class="row-between" style="gap:8px">
+          <select id="kind" class="input"><option value="">All</option><option value="shipper">Shippers</option><option value="receiver">Receivers</option></select>
+          <input id="partyFilter" class="input" placeholder="Filter parties">
+          <input id="partyName" class="input" placeholder="Name" />
+          <input id="partyPhone" class="input" placeholder="Phone" />
+          <input id="partyEmail" class="input" placeholder="Email" />
+          <button id="addParty" class="btn btn-accent">Add</button>
+        </div>
+      </div>
+      <div class="cards" id="partyList"></div>
+      <div class="muted" style="padding:10px">Tip: Click into fields to edit inline. Changes save on type.</div>
+    </section>
+
+    <section class="panel" style="margin-top:18px">
+      <div class="panel-header row-between">
+        <strong>Locations</strong>
+        <div class="row-between" style="gap:8px">
+          <input id="locPartyId" class="input" placeholder="Party ID" style="max-width:120px" />
+          <input id="locName" class="input" placeholder="Location name" />
+          <input id="locAddr" class="input" placeholder="Address" />
+          <input id="locCity" class="input" placeholder="City" />
+          <input id="locState" class="input" placeholder="State" />
+          <input id="locZip" class="input" placeholder="ZIP" />
+          <button id="addLoc" class="btn btn-accent">Add</button>
+        </div>
+      </div>
+      <div class="cards" id="locList"></div>
+      <div class="muted" style="padding:10px">Inline edit location fields; changes auto-save.</div>
+    </section>
+
+    <section class="panel" style="margin-top:18px">
+      <div class="panel-header row-between">
+        <strong>Recipients for a Location</strong>
+        <div class="row-between" style="gap:8px">
+          <input id="recLocId" class="input" placeholder="Location ID" style="max-width:140px" />
+          <input id="recName" class="input" placeholder="Name" />
+          <input id="recRole" class="input" placeholder="Role (agent/merchant/ops)" />
+          <input id="recPhone" class="input" placeholder="Phone" />
+          <input id="recEmail" class="input" placeholder="Email" />
+          <label class="muted" style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="recSMS" checked>SMS</label>
+          <label class="muted" style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="recEmailChk">Email</label>
+          <button id="addRec" class="btn btn-accent">Add</button>
+        </div>
+      </div>
+      <div class="cards" id="recList"></div>
+      <div class="muted" style="padding:10px">Toggle SMS/Email or edit contact info inline.</div>
+    </section>
+  </main>
+  <script type="module" src="/assets/portals.js"></script>
+</body>
+</html>

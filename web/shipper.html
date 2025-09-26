@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shipper View • DriverComm</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row-between">
+      <div class="brand">
+        <div class="logo">DC</div>
+        <div class="brand-text">
+          <h1>Shipper View</h1>
+          <p class="muted">Read‑only board</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-header row-between">
+        <strong>Active Loads</strong>
+        <input id="q" class="input" placeholder="Search by load, lane, commodity, status" style="max-width:320px" />
+      </div>
+      <div class="cards" style="padding:0">
+        <div style="overflow:auto">
+          <table id="board" style="width:100%; border-collapse:collapse">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="text-align:left; padding:10px">Load #</th>
+                <th style="text-align:left; padding:10px">Origin</th>
+                <th style="text-align:left; padding:10px">Destination</th>
+                <th style="text-align:left; padding:10px">Commodity</th>
+                <th style="text-align:left; padding:10px">Status</th>
+                <th style="text-align:left; padding:10px">ETA</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  <div class="modal-backdrop" id="threadBackdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <strong>Message Thread</strong>
+      <button class="table-btn" id="threadClose">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="thread" id="thread"></div>
+      <div class="compose">
+        <textarea id="threadText" placeholder="Type a message…"></textarea>
+        <select id="threadTarget" class="input">
+          <option value="driver">Driver</option>
+          <option value="dispatcher">Dispatcher</option>
+        </select>
+        <button class="btn btn-accent" id="threadSend">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+  <script type="module" src="/assets/shipper.js"></script>
+</body>
+</html>

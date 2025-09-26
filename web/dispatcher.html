@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dispatcher • DriverComm</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row-between">
+      <div class="brand">
+        <div class="logo">DC</div>
+        <div class="brand-text">
+          <h1>Dispatcher</h1>
+          <p class="muted">Master Board</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-header row-between">
+        <strong>Add Load</strong>
+        <div class="muted" id="clock"></div>
+      </div>
+      <div class="cards">
+        <form id="add-form" class="row-between" style="flex-wrap:wrap; gap:10px">
+          <input class="input" name="id" placeholder="Load #" style="flex:1 1 120px; min-width:140px">
+          <input class="input" name="origin" placeholder="Origin (City, ST)" required style="flex:2 1 180px; min-width:180px">
+          <input class="input" name="destination" placeholder="Destination (City, ST)" required style="flex:2 1 180px; min-width:180px">
+          <input class="input" name="driver" placeholder="Driver name" style="flex:1 1 160px; min-width:160px">
+<input class="input" name="commodity" placeholder="Commodity (e.g., SBM, DDGS)" style="flex:1 1 160px; min-width:160px">
+<input class="input" name="driverPhone" placeholder="Driver phone" style="flex:1 1 160px; min-width:160px">
+          <select class="input" name="status" style="flex:0 1 150px">
+            <option>Planned</option>
+            <option>En-route</option>
+            <option>Arrived</option>
+            <option>Loaded</option>
+            <option>En-route to unload</option>
+            <option>Delivered</option>
+          </select>
+          <input class="input" name="eta" placeholder="ETA (HH:MM)" style="flex:0 1 130px">
+<input class="input" name="originLocationId" placeholder="Origin Loc ID (optional)" style="flex:0 1 190px">
+<input class="input" name="destinationLocationId" placeholder="Dest Loc ID (optional)" style="flex:0 1 190px">
+<button class="btn btn-accent" type="submit">Add</button>
+        <input class="input" name="dispatcherPhone" placeholder="Dispatcher phone" style="flex:1 1 160px; min-width:160px">
+<input class="input" name="agentPhone" placeholder="Agent phone" style="flex:1 1 160px; min-width:160px">
+<input class="input" name="merchantPhone" placeholder="Merchant phone" style="flex:1 1 160px; min-width:160px">
+<input class="input" name="shipperPhone" placeholder="Shipper phone" style="flex:1 1 160px; min-width:160px">
+<input class="input" name="receiverPhone" placeholder="Receiver phone" style="flex:1 1 160px; min-width:160px">
+<button class="btn btn-accent" type="submit">Add</button>
+</form>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-header row-between">
+        <strong>Live Loads</strong>
+        <input id="q" class="input" placeholder="Search loads, lanes, driver..." style="max-width:300px">
+      </div>
+      <div class="cards" style="padding:0">
+        <div style="overflow:auto">
+          <table id="board" style="width:100%; border-collapse:collapse">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="text-align:left; padding:10px">Load #</th>
+                <th style="text-align:left; padding:10px">Lane</th>
+                <th style="text-align:left; padding:10px">Driver</th>
+                <th style="text-align:left; padding:10px">Status</th>
+                <th style="text-align:left; padding:10px">ETA</th>
+                <th style="text-align:left; padding:10px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  <div class="modal-backdrop" id="threadBackdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <strong>Message Thread</strong>
+      <button class="table-btn" id="threadClose">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="thread" id="thread"></div>
+      <div class="compose">
+        <textarea id="threadText" placeholder="Type a message…"></textarea>
+        <select id="threadTarget" class="input">
+          <option value="driver">Driver</option>
+          <option value="dispatcher">Dispatcher</option>
+        </select>
+        <button class="btn btn-accent" id="threadSend">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+  <script type="module" src="/assets/dispatcher.js"></script>
+</body>
+</html>
