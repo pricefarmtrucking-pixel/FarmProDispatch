@@ -1,22 +1,38 @@
-{
-  "name": "driver-comm",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "nodemon server/index.js",
-    "start": "node server/index.js",
-    "format": "prettier -w ."
-  },
-  "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "better-sqlite3": "^9.6.0",
-    "twilio": "^5.3.2",
-    "nodemailer": "^6.9.13"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0",
-    "prettier": "^3.3.3"
-  }
-}
+services:
+  - type: web
+    name: driver-comm
+    env: node
+    plan: starter
+    buildCommand: "npm install"
+    startCommand: "npm run start"
+    autoDeploy: true
+
+    # mount a persistent disk directly on the service
+    disk:
+      name: db-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_MESSAGING_SERVICE_SID
+        sync: false
+      - key: TWILIO_FROM
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: BASE_URL
+        sync: false
