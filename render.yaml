@@ -6,6 +6,13 @@ services:
     buildCommand: "npm install"
     startCommand: "npm run start"
     autoDeploy: true
+
+    # mount a persistent disk directly on the service
+    disk:
+      name: db-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+
     envVars:
       - key: NODE_ENV
         value: production
@@ -29,10 +36,3 @@ services:
         sync: false
       - key: BASE_URL
         sync: false
-    disk:
-      name: db-data
-      mountPath: /opt/render/project/src/data
-
-disks:
-  - name: db-data
-    sizeGB: 1
