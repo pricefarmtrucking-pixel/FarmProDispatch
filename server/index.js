@@ -1,0 +1,259 @@
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import { listLoads, upsertLoad, updateLoadPartial, deleteLoad, getLoad, listMessagesByLoad, listParties, createParty, updateParty, deleteParty, listLocations, createLocation, updateLocation, deleteLocation, listRecipients, createRecipient, updateRecipient, deleteRecipient, listMerchants, createMerchant, updateMerchant, deleteMerchant, listDispatchers, createDispatcher, updateDispatcher, deleteDispatcher } from './db.js';
+import { sendSMS, twilioReady } from './sms.js';
+import { sendEmail } from './email.js';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Basic JSON parsing for future API endpoints
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Health check
+app.get('/api/ping', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+/* LOADS_API_START */
+
+async function notifyLocationRecipients(locationId, subject, text){
+  if (!locationId) return;
+  const recips = listRecipients(Number(locationId));
+  for (const r of recips){
+    if (r.notifySMS && r.phone){ await sendSMS(r.phone, text); }
+    if (r.notifyEmail && r.email){ await sendEmail(r.email, subject, text); }
+  }
+}
+
+function recipientsForStatus(load){
+  // Rules:
+  // - 'En-route' (to pickup): notify agent, merchant, shipper, receiver
+  // - 'En-route to unload': notify agent, merchant, receiver (exclude shipper)
+  // - else: notify all stakeholders
+  const all = [load.agentPhone, load.merchantPhone, load.shipperPhone, load.receiverPhone]
+    .filter(Boolean);
+  const uniq = Array.from(new Set(all));
+  if (load.status?.toLowerCase().includes('en-route to unload')){
+    return uniq.filter(p => p !== load.shipperPhone);
+  }
+  if (load.status?.toLowerCase().includes('en-route')){
+    return uniq;
+  }
+  return uniq;
+}
+
+function driverLink(id){
+  const base = process.env.BASE_URL || `http://localhost:${PORT}`;
+  return `${base}/driver/${encodeURIComponent(id)}`;
+}
+
+// List
+app.get('/api/loads', (req,res)=>{
+  res.json({ ok:true, items: listLoads() });
+});
+
+// Single
+app.get('/api/loads/:id', (req,res)=>{
+  const one = getLoad(req.params.id);
+  if (!one) return res.status(404).json({ ok:false, error:'Not found' });
+  res.json({ ok:true, item: one });
+});
+
+// Create/Upsert
+app.post('/api/loads', async (req,res)=>{
+  const body = req.body || {};
+  const saved = upsertLoad(body);
+
+  // Send driver link on create if driverPhone present
+  if (body.driverPhone){
+    const msg = `Load ${saved.id}: ${saved.origin} → ${saved.destination}. Update status here: ${driverLink(saved.id)}`;
+    await sendSMS(saved.driverPhone, msg);
+  }
+
+  res.status(201).json({ ok:true, item:saved });
+});
+
+// Patch
+app.patch('/api/loads/:id', async (req,res)=>{
+  const { id } = req.params;
+  const before = getLoad(id);
+  if (!before) return res.status(404).json({ ok:false, error:'Not found'});
+  const patched = updateLoadPartial(id, req.body || {});
+  // If status or ETA changed, notify stakeholders
+  const statusChanged = (req.body.status && req.body.status !== before.status);
+  const etaChanged = (req.body.eta && req.body.eta !== before.eta);
+  if (statusChanged || etaChanged){
+    const recips = recipientsForStatus(patched);
+    const etaText = patched.eta ? ` ETA ${patched.eta}` : '';
+    const msg = `Load ${patched.id}: ${patched.status}.${etaText} ${patched.origin} → ${patched.destination}`;
+    for (const to of recips){
+      await sendSMS(to, msg);
+    }
+  }
+  res.json({ ok:true, item: patched });
+});
+
+// Delete
+app.delete('/api/loads/:id', (req,res)=>{
+  const { id } = req.params;
+  const r = deleteLoad(id);
+  if (r.changes === 0) return res.status(404).json({ ok:false, error:'Not found'});
+  res.json({ ok:true });
+});
+
+// Send a direct message (shipper → driver/dispatcher, dispatcher → driver)
+app.post('/api/message', async (req,res)=>{
+  const { loadId, to, body } = req.body || {};
+  if (!loadId || !to || !body) return res.status(400).json({ ok:false, error:'loadId, to, body required' });
+  const l = getLoad(loadId);
+  if (!l) return res.status(404).json({ ok:false, error:'Load not found' });
+  let toPhone = '';
+  if (to === 'driver') toPhone = l.driverPhone;
+  else if (to === 'dispatcher') toPhone = l.dispatcherPhone || l.agentPhone;
+  if (!toPhone) return res.status(400).json({ ok:false, error:`No phone on file for ${to}` });
+  const msg = `Load ${l.id}: ${body}`;
+  const r = await sendSMS(toPhone, msg);
+  try { const { logMessage } = await import('./db.js'); logMessage({ loadId, toRole: to, toPhone, body }); } catch(e) {}
+  res.json({ ok:true, sent: !!r?.ok, twilio: r });
+});
+/* LOADS_API_END */
+
+
+// Serve static web app
+const webDir = path.resolve(__dirname, '../web');
+app.use(express.static(webDir));
+
+// Driver link with ID
+app.get('/driver/:id', (req,res)=>{
+  res.sendFile(path.join(webDir, 'driver.html'));
+});
+
+app.get('/portal/:id', (req,res)=>{
+  res.sendFile(path.join(webDir, 'portal.html'));
+});
+
+
+// Messages (UI thread)
+app.get('/api/messages', (req,res)=>{
+  const { loadId } = req.query;
+  if (!loadId) return res.status(400).json({ ok:false, error:'loadId required' });
+  res.json({ ok:true, items: listMessagesByLoad(loadId) });
+});
+
+
+// Parties (Shipper/Receiver orgs)
+app.get('/api/parties', (req,res)=>{
+  const { kind } = req.query;
+  res.json({ ok:true, items: listParties(kind) });
+});
+app.post('/api/parties', (req,res)=>{ res.status(201).json({ ok:true, item: createParty(req.body||{}) }); });
+app.patch('/api/parties/:id', (req,res)=>{ res.json({ ok:true, item: updateParty(+req.params.id, req.body||{}) }); });
+app.delete('/api/parties/:id', (req,res)=>{ const r=deleteParty(+req.params.id); res.json({ ok: r.changes>0 }); });
+
+
+// Locations (per party)
+app.get('/api/locations', (req,res)=>{
+  const { partyId } = req.query;
+  if (!partyId) return res.status(400).json({ ok:false, error:'partyId required' });
+  res.json({ ok:true, items: listLocations(+partyId) });
+});
+app.post('/api/locations', (req,res)=>{ res.status(201).json({ ok:true, item: createLocation(req.body||{}) }); });
+app.patch('/api/locations/:id', (req,res)=>{ res.json({ ok:true, item: updateLocation(+req.params.id, req.body||{}) }); });
+app.delete('/api/locations/:id', (req,res)=>{ const r=deleteLocation(+req.params.id); res.json({ ok: r.changes>0 }); });
+
+
+// Recipients (per location)
+app.get('/api/recipients', (req,res)=>{
+  const { locationId } = req.query;
+  if (!locationId) return res.status(400).json({ ok:false, error:'locationId required' });
+  res.json({ ok:true, items: listRecipients(+locationId) });
+});
+app.post('/api/recipients', (req,res)=>{ res.status(201).json({ ok:true, item: createRecipient(req.body||{}) }); });
+app.patch('/api/recipients/:id', (req,res)=>{ res.json({ ok:true, item: updateRecipient(+req.params.id, req.body||{}) }); });
+app.delete('/api/recipients/:id', (req,res)=>{ const r=deleteRecipient(+req.params.id); res.json({ ok: r.changes>0 }); });
+
+
+// Merchants directory
+app.get('/api/merchants', (req,res)=>{ res.json({ ok:true, items: listMerchants() }); });
+app.post('/api/merchants', (req,res)=>{ res.status(201).json({ ok:true, item: createMerchant(req.body||{}) }); });
+app.patch('/api/merchants/:id', (req,res)=>{ res.json({ ok:true, item: updateMerchant(+req.params.id, req.body||{}) }); });
+app.delete('/api/merchants/:id', (req,res)=>{ const r=deleteMerchant(+req.params.id); res.json({ ok: r.changes>0 }); });
+
+
+// Dispatchers directory
+app.get('/api/dispatchers', (req,res)=>{ res.json({ ok:true, items: listDispatchers() }); });
+app.post('/api/dispatchers', (req,res)=>{ res.status(201).json({ ok:true, item: createDispatcher(req.body||{}) }); });
+app.patch('/api/dispatchers/:id', (req,res)=>{ res.json({ ok:true, item: updateDispatcher(+req.params.id, req.body||{}) }); });
+app.delete('/api/dispatchers/:id', (req,res)=>{ const r=deleteDispatcher(+req.params.id); res.json({ ok: r.changes>0 }); });
+
+// Fallback: serve index.html for unknown routes (useful later if using a client-router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(webDir, 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Driver-Comm server running on http://localhost:${PORT}`);
+});
+
+
+// Partners CRUD
+app.get('/api/partners', (req,res)=>{
+  const { type } = req.query;
+  res.json({ ok:true, items: listPartners(type) });
+});
+app.post('/api/partners', (req,res)=>{
+  const p = createPartner(req.body||{});
+  res.status(201).json({ ok:true, item:p });
+});
+app.patch('/api/partners/:id', (req,res)=>{
+  const id = Number(req.params.id);
+  const p = updatePartner(id, req.body||{});
+  if (!p) return res.status(404).json({ ok:false, error:'Not found' });
+  res.json({ ok:true, item:p });
+});
+app.delete('/api/partners/:id', (req,res)=>{
+  const id = Number(req.params.id);
+  const r = deletePartner(id);
+  res.json({ ok:true, changes: r.changes });
+});
+
+// Locations
+app.get('/api/partners/:id/locations', (req,res)=>{
+  res.json({ ok:true, items: listLocations(Number(req.params.id)) });
+});
+app.post('/api/partners/:id/locations', (req,res)=>{
+  const loc = createLocation({ ...(req.body||{}), partnerId: Number(req.params.id) });
+  res.status(201).json({ ok:true, item: loc });
+});
+app.patch('/api/locations/:id', (req,res)=>{
+  const loc = updateLocation(Number(req.params.id), req.body||{});
+  if (!loc) return res.status(404).json({ ok:false, error:'Not found' });
+  res.json({ ok:true, item: loc });
+});
+app.delete('/api/locations/:id', (req,res)=>{
+  const r = deleteLocation(Number(req.params.id));
+  res.json({ ok:true, changes: r.changes });
+});
+
+// Location recipients
+app.get('/api/locations/:id/recipients', (req,res)=>{
+  res.json({ ok:true, items: listLocationRecipients(Number(req.params.id)) });
+});
+app.post('/api/locations/:id/recipients', (req,res)=>{
+  const { partnerId, channel } = req.body||{};
+  const items = addLocationRecipient(Number(req.params.id), Number(partnerId), channel||'sms');
+  res.status(201).json({ ok:true, items });
+});
+app.delete('/api/locationRecipients/:id', (req,res)=>{
+  const r = removeLocationRecipient(Number(req.params.id));
+  res.json({ ok:true, changes: r.changes });
+});
