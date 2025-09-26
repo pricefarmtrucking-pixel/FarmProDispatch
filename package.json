@@ -1,38 +1,18 @@
-services:
-  - type: web
-    name: driver-comm
-    env: node
-    plan: starter
-    buildCommand: "npm install"
-    startCommand: "npm run start"
-    autoDeploy: true
-
-    # mount a persistent disk directly on the service
-    disk:
-      name: db-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
-
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: TWILIO_ACCOUNT_SID
-        sync: false
-      - key: TWILIO_AUTH_TOKEN
-        sync: false
-      - key: TWILIO_MESSAGING_SERVICE_SID
-        sync: false
-      - key: TWILIO_FROM
-        sync: false
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_PORT
-        sync: false
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
-        sync: false
-      - key: FROM_EMAIL
-        sync: false
-      - key: BASE_URL
-        sync: false
+{
+  "name": "driver-comm",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "node server/index.js"
+  },
+  "engines": { "node": "20.x" },
+  "dependencies": {
+    "better-sqlite3": "^9.6.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.13",
+    "twilio": "^5.3.2"
+  }
+}
